@@ -1,0 +1,13 @@
+Job Title: Prompt Engineer Intern
+
+We are looking for an intern with:
+- Strong Python programming skills.
+- Familiarity with LLM APIs (OpenAI, Gemini, or similar).
+- Experience with prompt engineering and structured output design.
+- Understanding of JSON and API integration.
+- Basic knowledge of machine learning concepts.
+- Good communication and documentation skills.
+
+Nice to have:
+- Experience with Streamlit or similar rapid prototyping tools.
+- Exposure to retrieval-augmented generation (RAG).

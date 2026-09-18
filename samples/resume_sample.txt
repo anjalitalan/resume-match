@@ -1,0 +1,11 @@
+Manvendra Singh
+B.Tech Computer Science Student
+
+Skills: Python, Java, SQL, Machine Learning, Git, REST APIs
+Experience:
+- Built a machine learning model to predict housing prices using scikit-learn.
+- Developed a full-stack web application using Flask and PostgreSQL.
+- Interned as a backend developer, worked on REST API design and testing.
+
+Education:
+B.Tech in Computer Science and Engineering, expected 2027.
