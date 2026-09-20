@@ -1,10 +1,12 @@
 from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 from google.genai.errors import APIError
 
 from resume_match.extraction.resume import extract_resume
 from resume_match.extraction.schemas import ExtractedResume, ExtractionError
+from resume_match.input_handler import InputValidationError
 
 
 def _client_returning(parsed):
@@ -46,3 +48,22 @@ def test_extract_resume_raises_on_api_error():
     with patch("resume_match.extraction.resume.get_client", return_value=client):
         with pytest.raises(ExtractionError):
             extract_resume("some resume text")
+
+
+def test_extract_resume_raises_on_network_timeout():
+    client = MagicMock()
+    client.models.generate_content.side_effect = httpx.TimeoutException("timed out")
+
+    with patch("resume_match.extraction.resume.get_client", return_value=client):
+        with pytest.raises(ExtractionError):
+            extract_resume("some resume text")
+
+
+def test_extract_resume_rejects_empty_input_without_calling_api():
+    client = MagicMock()
+
+    with patch("resume_match.extraction.resume.get_client", return_value=client):
+        with pytest.raises(InputValidationError):
+            extract_resume("   ")
+
+    client.models.generate_content.assert_not_called()

@@ -1,8 +1,10 @@
+import httpx
 from google.genai import types
 from google.genai.errors import APIError
 
 from resume_match.extraction.schemas import ExtractedJobDescription, ExtractionError
 from resume_match.gemini_client import DEFAULT_MODEL, get_client
+from resume_match.input_handler import clean_text
 
 JOB_DESCRIPTION_EXTRACTION_PROMPT = """You are an expert technical recruiter. Extract \
 structured information from the job description below.
@@ -14,6 +16,8 @@ Rules:
 - "key_requirements" should capture must-have requirements stated in the posting \
 (e.g. years of experience, degree requirements, certifications), not skills already \
 captured in the skills/technologies lists.
+- If a category has no relevant information in the posting, return an empty list for it.
+  Do not fabricate a placeholder value.
 
 Job description:
 {job_description_text}
@@ -21,8 +25,9 @@ Job description:
 
 
 def extract_job_description(job_description_text: str) -> ExtractedJobDescription:
+    cleaned_text = clean_text(job_description_text, "Job description")
     client = get_client()
-    prompt = JOB_DESCRIPTION_EXTRACTION_PROMPT.format(job_description_text=job_description_text)
+    prompt = JOB_DESCRIPTION_EXTRACTION_PROMPT.format(job_description_text=cleaned_text)
 
     try:
         response = client.models.generate_content(
@@ -33,7 +38,7 @@ def extract_job_description(job_description_text: str) -> ExtractedJobDescriptio
                 response_schema=ExtractedJobDescription,
             ),
         )
-    except APIError as e:
+    except (APIError, httpx.TimeoutException, httpx.ConnectError) as e:
         raise ExtractionError(
             f"Gemini API call failed during job description extraction: {e}"
         ) from e

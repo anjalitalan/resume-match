@@ -1,10 +1,12 @@
 from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 from google.genai.errors import APIError
 
 from resume_match.extraction.job_description import extract_job_description
 from resume_match.extraction.schemas import ExtractedJobDescription, ExtractionError
+from resume_match.input_handler import InputValidationError
 
 
 def _client_returning(parsed):
@@ -46,3 +48,22 @@ def test_extract_job_description_raises_on_api_error():
     with patch("resume_match.extraction.job_description.get_client", return_value=client):
         with pytest.raises(ExtractionError):
             extract_job_description("some job description text")
+
+
+def test_extract_job_description_raises_on_network_timeout():
+    client = MagicMock()
+    client.models.generate_content.side_effect = httpx.ConnectError("no connection")
+
+    with patch("resume_match.extraction.job_description.get_client", return_value=client):
+        with pytest.raises(ExtractionError):
+            extract_job_description("some job description text")
+
+
+def test_extract_job_description_rejects_empty_input_without_calling_api():
+    client = MagicMock()
+
+    with patch("resume_match.extraction.job_description.get_client", return_value=client):
+        with pytest.raises(InputValidationError):
+            extract_job_description("   ")
+
+    client.models.generate_content.assert_not_called()

@@ -21,7 +21,7 @@ def load_text_from_file(path: str) -> str:
     return file_path.read_text(encoding="utf-8")
 
 
-def _clean_text(text: str, label: str) -> str:
+def clean_text(text: str, label: str) -> str:
     cleaned = text.strip()
     if not cleaned:
         raise InputValidationError(f"{label} is empty.")
@@ -35,6 +35,6 @@ def _clean_text(text: str, label: str) -> str:
 
 def build_analysis_input(resume_text: str, job_description_text: str) -> AnalysisInput:
     return AnalysisInput(
-        resume_text=_clean_text(resume_text, "Resume"),
-        job_description_text=_clean_text(job_description_text, "Job description"),
+        resume_text=clean_text(resume_text, "Resume"),
+        job_description_text=clean_text(job_description_text, "Job description"),
     )
