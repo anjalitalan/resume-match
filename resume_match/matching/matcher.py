@@ -2,15 +2,20 @@ from resume_match.extraction.schemas import ExtractedJobDescription, ExtractedRe
 from resume_match.matching.schemas import CategoryMatch, MatchResult
 
 
-def _normalize(value: str) -> str:
+def normalize_item(value: str) -> str:
+    """Case/whitespace normalization shared by matching and scoring.
+
+    Intentionally conservative: lowercases and collapses whitespace only.
+    No stemming, punctuation stripping, or synonym mapping.
+    """
     return " ".join(value.strip().lower().split())
 
 
 def _compare(required: list[str], available: list[str]) -> CategoryMatch:
-    available_normalized = {_normalize(item) for item in available}
+    available_normalized = {normalize_item(item) for item in available}
 
-    matched = [item for item in required if _normalize(item) in available_normalized]
-    missing = [item for item in required if _normalize(item) not in available_normalized]
+    matched = [item for item in required if normalize_item(item) in available_normalized]
+    missing = [item for item in required if normalize_item(item) not in available_normalized]
 
     return CategoryMatch(matched=matched, missing=missing)
 
