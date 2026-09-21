@@ -3,7 +3,7 @@ from google.genai import types
 from google.genai.errors import APIError
 
 from resume_match.extraction.schemas import ExtractedJobDescription, ExtractionError
-from resume_match.gemini_client import DEFAULT_MODEL, get_client
+from resume_match.gemini_client import DEFAULT_MODEL, call_with_retry, get_client
 from resume_match.input_handler import clean_text
 
 JOB_DESCRIPTION_EXTRACTION_PROMPT = """You are an expert technical recruiter. Extract \
@@ -30,13 +30,15 @@ def extract_job_description(job_description_text: str) -> ExtractedJobDescriptio
     prompt = JOB_DESCRIPTION_EXTRACTION_PROMPT.format(job_description_text=cleaned_text)
 
     try:
-        response = client.models.generate_content(
-            model=DEFAULT_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=ExtractedJobDescription,
-            ),
+        response = call_with_retry(
+            lambda: client.models.generate_content(
+                model=DEFAULT_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=ExtractedJobDescription,
+                ),
+            )
         )
     except (APIError, httpx.TimeoutException, httpx.ConnectError) as e:
         raise ExtractionError(
