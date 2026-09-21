@@ -3,6 +3,23 @@ from resume_match.matching.schemas import CategoryMatch, MatchResult
 from resume_match.scoring.schemas import ScoreResult
 
 
+def unique_items(items: list[str]) -> list[str]:
+    """Deduplicates items by normalized value, keeping the first original-cased occurrence.
+
+    Uses the same normalize_item semantics compute_score uses internally, so any
+    caller displaying matched/missing items (e.g. the UI) can show counts that agree
+    with the coverage score instead of the raw, duplicate-containing list length.
+    """
+    seen: set[str] = set()
+    result: list[str] = []
+    for item in items:
+        key = normalize_item(item)
+        if key not in seen:
+            seen.add(key)
+            result.append(item)
+    return result
+
+
 def _unique_counts(category: CategoryMatch) -> tuple[int, int]:
     """Returns (unique matched count, unique required count) for one category.
 

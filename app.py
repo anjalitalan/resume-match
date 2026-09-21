@@ -4,6 +4,7 @@ from resume_match.analysis import AnalysisResult, analyze
 from resume_match.extraction.schemas import ExtractionError
 from resume_match.input_handler import InputValidationError
 from resume_match.matching.schemas import CategoryMatch
+from resume_match.scoring.scorer import unique_items
 
 SAMPLE_RESUME_PATH = "samples/resume_sample.txt"
 SAMPLE_JD_PATH = "samples/job_description_sample.txt"
@@ -36,18 +37,23 @@ def _load_sample(path: str, text_key: str) -> None:
 
 
 def _render_category(title: str, category: CategoryMatch) -> None:
+    # Deduplicated the same way compute_score() counts requirements, so the displayed
+    # counts always agree with the coverage percentage above (see code review finding).
+    matched = unique_items(category.matched)
+    missing = unique_items(category.missing)
+
     matched_col, missing_col = st.columns(2)
     with matched_col:
-        st.markdown(f"**Matched {title}** ({len(category.matched)})")
-        for item in category.matched:
+        st.markdown(f"**Matched {title}** ({len(matched)})")
+        for item in matched:
             st.markdown(f"- ✅ {item}")
-        if not category.matched:
+        if not matched:
             st.caption("None")
     with missing_col:
-        st.markdown(f"**Missing {title}** ({len(category.missing)})")
-        for item in category.missing:
+        st.markdown(f"**Missing {title}** ({len(missing)})")
+        for item in missing:
             st.markdown(f"- ❌ {item}")
-        if not category.missing:
+        if not missing:
             st.caption("None")
 
 

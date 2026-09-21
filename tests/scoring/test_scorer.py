@@ -1,5 +1,5 @@
 from resume_match.matching.schemas import CategoryMatch, MatchResult
-from resume_match.scoring.scorer import compute_score
+from resume_match.scoring.scorer import compute_score, unique_items
 
 
 def test_full_coverage_is_100_percent():
@@ -107,6 +107,34 @@ def test_key_requirements_excluded_from_percent_but_surfaced_separately():
 
     assert score.coverage_percent == 100
     assert score.unverifiable_requirements == ["3+ years experience", "Bachelor's degree"]
+
+
+def test_unique_items_deduplicates_by_normalized_value_preserving_first_casing():
+    assert unique_items(["Python", "python", "  PYTHON ", "SQL"]) == ["Python", "SQL"]
+    assert unique_items([]) == []
+
+
+def test_displayed_matched_and_missing_counts_agree_with_score_for_duplicate_requirements():
+    # Regression test for the UI inconsistency found in code review: the UI must
+    # display unique_items(category.matched/missing) rather than the raw
+    # (duplicate-containing) lists, so its counts can never disagree with
+    # compute_score()'s totals again.
+    result = MatchResult(
+        skills=CategoryMatch(matched=["Python", "Python"], missing=["SQL"]),
+        technologies=CategoryMatch(matched=[], missing=[]),
+        qualifications=CategoryMatch(matched=[], missing=[]),
+        key_requirements=[],
+    )
+
+    score = compute_score(result)
+
+    displayed_matched = unique_items(result.skills.matched)
+    displayed_missing = unique_items(result.skills.missing)
+
+    assert displayed_matched == ["Python"]
+    assert displayed_missing == ["SQL"]
+    assert len(displayed_matched) == score.total_matched_items
+    assert len(displayed_matched) + len(displayed_missing) == score.total_required_items
 
 
 def test_note_is_always_present_and_non_empty():

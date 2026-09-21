@@ -1,4 +1,4 @@
-Manvendra Singh
+Priya Sharma
 B.Tech Computer Science Student
 
 Skills: Python, Java, SQL, Machine Learning, Git, REST APIs

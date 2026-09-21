@@ -1,13 +1,19 @@
 from dotenv import load_dotenv
 from google import genai
 
-load_dotenv()
 
-client = genai.Client()
+def main() -> None:
+    load_dotenv()
 
-response = client.models.generate_content(
-    model="gemini-3.6-flash",
-    contents="Say hello in one short sentence.",
-)
+    client = genai.Client()
 
-print(response.text)
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents="Say hello in one short sentence.",
+    )
+
+    print(response.text)
+
+
+if __name__ == "__main__":
+    main()
