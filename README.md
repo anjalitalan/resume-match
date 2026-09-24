@@ -1,5 +1,9 @@
 # Resume Match
 
+> Analyze a resume against a job description using Gemini and deterministic requirement matching.
+
+**Live Demo:** [Open Resume Match](https://anjali-resume-match.streamlit.app/)
+
 A tool that compares a resume against a job description: it uses the Gemini API to pull
 structured information out of both documents, then compares them with deterministic,
 rule-based logic — no LLM call decides whether something "matches."
